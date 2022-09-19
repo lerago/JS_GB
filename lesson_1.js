@@ -26,14 +26,20 @@ class GoodsItem {
 class GoodsList {
    list = [];
    fetchGoods() {
-      this.list = goods;
+      this.items = goods;
    }
    render() {
-      const resultList = this.list.map(item => {
+      const resultList = this.items.map(item => {
          const goodsItem = new GoodsItem(item);
          return goodsItem.render();
       });
       document.querySelector('.goods-list').innerHTML = resultList.join('');
+   }
+
+   sumPrice () {
+      return this.items.reduce (function (acc, item) {
+         return acc + item.price
+      }, 0)
    }
 }
 
@@ -41,3 +47,5 @@ class GoodsList {
 const goodsList = new GoodsList ();
 goodsList.fetchGoods();
 goodsList.render();
+const result = goodsList.sumPrice();
+console.log(result);
