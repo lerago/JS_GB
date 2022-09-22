@@ -1,19 +1,66 @@
 'use strict';
 
-const goods = [
-   { title: 'Shirt', price: 150 },
-   { title: 'Socks', price: 50 },
-   { title: 'Jacket', price: 350 },
-   { title: 'Shoes', price: 250 },
-];
+const URL = "https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses";
+const GOODS = "/catalogData.json";
 
-const renderGoodsItem = ({title = " ", price = 0}) => {
-   return `<div class="goods-item"><h3>${title}</h3><p>${price}</p></div>`;
-};
+const url = `${URL}${GOODS}`;
 
-const renderGoodsList = (list = []) => {
-   let goodsList = list.map(item => renderGoodsItem(item)).join('');
-   document.querySelector('.goods-list').innerHTML = goodsList;
+function service(url) {
+   return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onload = () => {
+         resolve(JSON.parse(xhr.response))
+      };
+      xhr.send();
+   })
 }
 
-renderGoodsList(goods);
+
+class GoodsItem {
+   constructor({ product_name = " ", price = 0 }) {
+      this.product_name = product_name;
+      this.price = price;
+   }
+
+   render() {
+      return `
+      <div class="goods-item">
+         <h3>${this.product_name}</h3>
+         <p>${this.price}</p>
+      </div>
+      `
+   }
+}
+
+class GoodsList {
+   items = [];
+   fetchGoods() {
+      return new Promise((resolve) => {
+      service(url).then ((data) => {
+         this.items = data;
+         resolve()
+      })});
+   }
+
+   render() {
+      const resultList = this.items.map(item => {
+         const goodsItem = new GoodsItem(item);
+         return goodsItem.render();
+      });
+      document.querySelector('.goods-list').innerHTML = resultList.join('');
+   }
+
+   sumPrice() {
+      return this.items.reduce(function (acc, item) {
+         return acc + item.price
+      }, 0)
+   }
+}
+
+
+const goodsList = new GoodsList();
+goodsList.fetchGoods().then(() => {
+   goodsList.render();
+});
+
