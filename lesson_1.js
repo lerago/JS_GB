@@ -1,66 +1,55 @@
 'use strict';
 
-const URL = "https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses";
-const GOODS = "/catalogData.json";
-
-const url = `${URL}${GOODS}`;
+const BASE_URL = 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/';
+const GET_GOODS_ITEMS = `${BASE_URL}catalogData.json`
+const GET_BASKET_GOODS_ITEMS = `${BASE_URL}getBasket.json`
 
 function service(url) {
-   return new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', url);
-      xhr.onload = () => {
-         resolve(JSON.parse(xhr.response))
-      };
-      xhr.send();
+   return fetch(url)
+      .then((res) => res.json())
+}
+
+function init() {
+   const app = new Vue({
+      el: '#root',
+      data: {
+         items: [],
+         filteredItems: [],
+         search: '',
+         isVisibleCart: false
+      },
+      methods: {
+         fetchGoods() {
+            service(GET_GOODS_ITEMS).then((data) => {
+               this.items = data;
+               this.filteredItems = data;
+            });
+         },
+         filterItems() {
+            this.filteredItems = this.items.filter(({ product_name }) => {
+               return product_name.match(new RegExp(this.search, 'gui'))
+            })
+         },
+         setVisibleCard() {
+            this.isVisibleCart = !this.isVisibleCart
+         }
+      },
+      computed: {
+         calculatePrice() {
+            return this.filteredItems.reduce((prev, { price }) => {
+               return prev + price;
+            }, 0)
+         }
+      },
+      mounted() {
+         this.fetchGoods();
+      }
    })
 }
+window.onload = init
 
 
-class GoodsItem {
-   constructor({ product_name = " ", price = 0 }) {
-      this.product_name = product_name;
-      this.price = price;
-   }
-
-   render() {
-      return `
-      <div class="goods-item">
-         <h3>${this.product_name}</h3>
-         <p>${this.price}</p>
-      </div>
-      `
-   }
-}
-
-class GoodsList {
-   items = [];
-   fetchGoods() {
-      return new Promise((resolve) => {
-      service(url).then ((data) => {
-         this.items = data;
-         resolve()
-      })});
-   }
-
-   render() {
-      const resultList = this.items.map(item => {
-         const goodsItem = new GoodsItem(item);
-         return goodsItem.render();
-      });
-      document.querySelector('.goods-list').innerHTML = resultList.join('');
-   }
-
-   sumPrice() {
-      return this.items.reduce(function (acc, item) {
-         return acc + item.price
-      }, 0)
-   }
-}
 
 
-const goodsList = new GoodsList();
-goodsList.fetchGoods().then(() => {
-   goodsList.render();
-});
+
 
