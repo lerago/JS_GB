@@ -5,7 +5,7 @@
    <meta charset="UTF-8" />
    <title>eShop</title>
    <link rel="stylesheet" href="style.css" />
-   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+   <script src="https://unpkg.com/vue@next"></script>
    <script src="lesson_1.js"></script>
 </head>
 
@@ -14,36 +14,21 @@
       <header>
          <h1 class="title">eShop</h1>
          <div class="search">
-            <input type="text" class="goods-search" v-model="search" />
-            <button class="search-button" type="button" v-on:click="filterItems">
-               Искать
-            </button>
+            <search-component v-model="search"></search-component>
          </div>
          <div class="actions">
-            <button class="cart-button" type="button" @click="setVisibleCard">Корзина</button>
+            <custom-button @click="setVisibleCard">Корзина</custom-button>
          </div>
       </header>
       <main>
          <div class="goods-list">
-            <div class="goods-item" v-for="item in filteredItems">
-               <h3>{{ item.product_name }}</h3>
-               <p>{{ item.price }}</p>
-            </div>
+            <goods-item v-for="item in filteredItems" :item="item"></goods-item>
          </div>
       </main>
 
-      <div class="fixed-area" v-if="isVisibleCart">
-         <div class="basket-card">
-            <div class="basket-card__header">
-               <h1 class="basket-card__header__title">basket card</h1>
-               <div class="basket-card__header__delete-icon" @click="setVisibleCard"></div>
-            </div>
+      <basket @close="setVisibleCard" v-if="IsVisibleCart"></basket>
 
-            <div class="basket-card__content">content</div>
-         </div>
-      </div>
-
-      <div>{{ calculatePrice }}</div>
+      <!--<div>{{ calculatePrice }}</div>-->
    </div>
 </body>
 
